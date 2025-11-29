@@ -1,0 +1,2528 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Removed HORMtech from title -->
+    <title>Data Warehouse - Présentation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+        :root {
+            --primary: #0066FF;
+            --secondary: #00D68F;
+            --accent: #FF8C00;
+            --highlight: #FFD600;
+            --danger: #FF3D71;
+            --purple: #9B51E0;
+            --cyan: #00D4FF;
+            --bg-light: #FFFFFF;
+            --text-dark: #1A1A2E;
+            --text-medium: #4A4A6A;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .slideshow {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 60px 100px 60px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(100%);
+            transition: all 0.8s cubic-bezier(0.68, -0.15, 0.27, 1.15);
+            background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        .slide.prev {
+            transform: translateX(-100%);
+        }
+
+        .section-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 10px;
+            height: 100%;
+        }
+
+        .section-blue { background: linear-gradient(180deg, #0066FF, #0044CC); }
+        .section-green { background: linear-gradient(180deg, #00D68F, #00B377); }
+        .section-red { background: linear-gradient(180deg, #FF3D71, #CC2255); }
+        .section-yellow { background: linear-gradient(180deg, #FFD600, #FFAA00); }
+        .section-purple { background: linear-gradient(180deg, #9B51E0, #7B3DC9); }
+
+        .bg-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Made floating shapes bigger and more animated */
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) { width: 120px; height: 120px; background: linear-gradient(135deg, var(--primary), var(--cyan)); top: 3%; left: 2%; animation: float 5s ease-in-out infinite, pulse 2s ease-in-out infinite; }
+        .shape:nth-child(2) { width: 100px; height: 100px; background: linear-gradient(135deg, var(--secondary), var(--highlight)); top: 65%; right: 3%; animation: float 6s ease-in-out infinite reverse, pulse 2.5s ease-in-out infinite; animation-delay: -2s; }
+        .shape:nth-child(3) { width: 80px; height: 80px; background: linear-gradient(135deg, var(--purple), var(--accent)); bottom: 8%; left: 4%; animation: float 7s ease-in-out infinite, spin 10s linear infinite; animation-delay: -4s; }
+        .shape:nth-child(4) { width: 90px; height: 90px; background: linear-gradient(135deg, var(--accent), var(--danger)); top: 10%; right: 5%; animation: float 5.5s ease-in-out infinite, pulse 3s ease-in-out infinite; animation-delay: -1s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-30px) rotate(10deg); }
+            50% { transform: translateY(-15px) rotate(-8deg); }
+            75% { transform: translateY(-35px) rotate(5deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.15); opacity: 0.9; }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            max-width: 1400px;
+            text-align: center;
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            /* Bigger slide number */
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+            background: rgba(0, 102, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .speaker-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            /* Bigger speaker badge */
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .speaker-1 { background: linear-gradient(135deg, #0066FF, #0044CC); }
+        .speaker-2 { background: linear-gradient(135deg, #00D68F, #00B377); }
+        .speaker-3 { background: linear-gradient(135deg, #FF3D71, #CC2255); }
+        .speaker-4 { background: linear-gradient(135deg, #FFD600, #CC9900); color: #333; }
+        .speaker-5 { background: linear-gradient(135deg, #9B51E0, #7B3DC9); }
+
+        /* Much bigger text sizes */
+        h1 {
+            font-size: clamp(2.2rem, 4vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 10px;
+            line-height: 1.2;
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: clamp(1.8rem, 3vw, 2.8rem);
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        h3 {
+            font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+            color: var(--text-medium);
+            max-width: 1000px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        /* Much bigger icon containers */
+        .icon-container {
+            width: 260px;
+            height: 260px;
+            position: relative;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1300px;
+            margin-top: 15px;
+        }
+
+        .content-grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .content-grid-4 { grid-template-columns: repeat(4, 1fr); }
+        .content-grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+        .content-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            transition: all 0.4s ease;
+            text-align: left;
+            cursor: grab;
+        }
+
+        .content-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0, 102, 255, 0.2);
+            border-color: var(--primary);
+        }
+
+        .content-card.dragging {
+            cursor: grabbing;
+            opacity: 0.8;
+            transform: scale(1.03);
+            z-index: 1000;
+        }
+
+        /* Bigger card icons */
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            font-size: 28px;
+            animation: iconBounce 3s ease-in-out infinite;
+        }
+
+        /* Bigger card text */
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .card-text {
+            font-size: 1.05rem;
+            color: var(--text-medium);
+            line-height: 1.5;
+        }
+
+        .keyword {
+            position: relative;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: help;
+            border-bottom: 2px dotted var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .keyword:hover {
+            color: var(--purple);
+            border-bottom-color: var(--purple);
+        }
+
+        .tooltip {
+            position: fixed;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 16px 20px;
+            max-width: 350px;
+            box-shadow: 0 12px 50px rgba(0, 102, 255, 0.3);
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            /* Bigger tooltip text */
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--text-dark);
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tooltip-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 1.1rem;
+        }
+
+        .nav-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 100;
+            background: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 102, 255, 0.35);
+        }
+
+        .nav-btn:hover { transform: scale(1.15); }
+        .nav-btn:active { transform: scale(0.95); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        .progress-bar {
+            width: 200px;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--purple));
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .slide-counter {
+            font-weight: 600;
+            color: var(--text-dark);
+            min-width: 70px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        /* MUCH BIGGER AND MORE ANIMATED ICONS */
+        
+        /* Database Icon - Bigger and more animated */
+        .database-icon {
+            position: relative;
+            width: 220px;
+            height: 220px;
+        }
+
+        .db-cylinder {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary), var(--cyan));
+            border-radius: 70px / 22px;
+            box-shadow: 0 8px 30px rgba(0, 102, 255, 0.4);
+        }
+
+        .db-cylinder::after {
+            content: '';
+            position: absolute;
+            bottom: -35px;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: inherit;
+            border-radius: 0 0 70px 70px / 0 0 22px 22px;
+        }
+
+        .db-cyl-1 { top: 15px; animation: dbPulse 1.5s ease-in-out infinite, dbGlow 2s ease-in-out infinite; }
+        .db-cyl-2 { top: 70px; animation: dbPulse 1.5s ease-in-out infinite 0.2s, dbGlow 2s ease-in-out infinite 0.3s; }
+        .db-cyl-3 { top: 125px; animation: dbPulse 1.5s ease-in-out infinite 0.4s, dbGlow 2s ease-in-out infinite 0.6s; }
+
+        @keyframes dbPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.08); }
+        }
+
+        @keyframes dbGlow {
+            0%, 100% { box-shadow: 0 8px 30px rgba(0, 102, 255, 0.4); }
+            50% { box-shadow: 0 12px 50px rgba(0, 102, 255, 0.7), 0 0 30px rgba(0, 212, 255, 0.5); }
+        }
+
+        .db-data-stream {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: var(--highlight);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--highlight), 0 0 40px var(--highlight);
+            animation: dataStream 1.2s linear infinite;
+        }
+
+        .db-stream-1 { left: 25%; animation-delay: 0s; }
+        .db-stream-2 { left: 50%; animation-delay: 0.4s; }
+        .db-stream-3 { left: 75%; animation-delay: 0.8s; }
+
+        @keyframes dataStream {
+            0% { top: 0; opacity: 0; transform: scale(0.5); }
+            20% { opacity: 1; transform: scale(1); }
+            80% { opacity: 1; transform: scale(1); }
+            100% { top: 200px; opacity: 0; transform: scale(0.5); }
+        }
+
+        /* Warehouse Icon - Bigger and more animated */
+        .warehouse-icon {
+            position: relative;
+            width: 260px;
+            height: 220px;
+        }
+
+        .warehouse-building {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 140px;
+            background: linear-gradient(135deg, var(--primary), #0044CC);
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 15px 50px rgba(0, 102, 255, 0.4);
+            animation: buildingPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes buildingPulse {
+            0%, 100% { box-shadow: 0 15px 50px rgba(0, 102, 255, 0.4); }
+            50% { box-shadow: 0 20px 70px rgba(0, 102, 255, 0.6), 0 0 40px rgba(0, 212, 255, 0.3); }
+        }
+
+        .warehouse-roof {
+            position: absolute;
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 130px solid transparent;
+            border-right: 130px solid transparent;
+            border-bottom: 65px solid var(--cyan);
+            filter: drop-shadow(0 -5px 20px rgba(0, 212, 255, 0.5));
+            animation: roofGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes roofGlow {
+            0%, 100% { filter: drop-shadow(0 -5px 20px rgba(0, 212, 255, 0.5)); }
+            50% { filter: drop-shadow(0 -10px 40px rgba(0, 212, 255, 0.8)); }
+        }
+
+        .warehouse-window {
+            position: absolute;
+            width: 35px;
+            height: 30px;
+            background: var(--highlight);
+            border-radius: 5px;
+            animation: windowGlow 1.5s ease-in-out infinite;
+        }
+
+        .wh-win-1 { bottom: 85px; left: calc(50% - 72px); }
+        .wh-win-2 { bottom: 85px; left: calc(50% - 17px); animation-delay: 0.2s; }
+        .wh-win-3 { bottom: 85px; left: calc(50% + 38px); animation-delay: 0.4s; }
+        .wh-win-4 { bottom: 35px; left: calc(50% - 72px); animation-delay: 0.6s; }
+        .wh-win-5 { bottom: 35px; left: calc(50% - 17px); animation-delay: 0.8s; }
+        .wh-win-6 { bottom: 35px; left: calc(50% + 38px); animation-delay: 1s; }
+
+        @keyframes windowGlow {
+            0%, 100% { opacity: 0.6; box-shadow: 0 0 10px var(--highlight); transform: scale(1); }
+            50% { opacity: 1; box-shadow: 0 0 30px var(--highlight), 0 0 50px var(--highlight); transform: scale(1.1); }
+        }
+
+        /* ETL Pipeline - Bigger and more animated */
+        .etl-icon {
+            position: relative;
+            width: 340px;
+            height: 200px;
+        }
+
+        .etl-box {
+            position: absolute;
+            width: 85px;
+            height: 85px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 24px;
+            color: white;
+            cursor: grab;
+            transition: transform 0.3s ease;
+        }
+
+        .etl-box:hover { transform: scale(1.15) rotate(5deg); }
+
+        .etl-extract { 
+            left: 0; top: 50%; transform: translateY(-50%); 
+            background: linear-gradient(135deg, var(--danger), #FF6B6B); 
+            animation: etlPulse 1.5s ease-in-out infinite, etlRotate 4s ease-in-out infinite;
+            box-shadow: 0 8px 30px rgba(255, 61, 113, 0.5);
+        }
+        .etl-transform { 
+            left: 50%; top: 50%; transform: translate(-50%, -50%); 
+            background: linear-gradient(135deg, var(--highlight), var(--accent)); 
+            animation: etlPulse 1.5s ease-in-out infinite 0.3s, etlRotate 4s ease-in-out infinite reverse;
+            box-shadow: 0 8px 30px rgba(255, 140, 0, 0.5);
+        }
+        .etl-load { 
+            right: 0; top: 50%; transform: translateY(-50%); 
+            background: linear-gradient(135deg, var(--secondary), #00E5A0); 
+            animation: etlPulse 1.5s ease-in-out infinite 0.6s, etlRotate 4s ease-in-out infinite;
+            box-shadow: 0 8px 30px rgba(0, 214, 143, 0.5);
+        }
+
+        @keyframes etlPulse {
+            0%, 100% { box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+            50% { box-shadow: 0 15px 50px rgba(0,0,0,0.5), 0 0 30px currentColor; }
+        }
+
+        @keyframes etlRotate {
+            0%, 100% { transform: translateY(-50%) rotate(0deg); }
+            25% { transform: translateY(-50%) rotate(3deg); }
+            75% { transform: translateY(-50%) rotate(-3deg); }
+        }
+
+        .etl-arrow {
+            position: absolute;
+            top: 50%;
+            width: 45px;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--cyan));
+            transform: translateY(-50%);
+            animation: arrowFlow 1s ease-in-out infinite;
+        }
+
+        .etl-arrow::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            top: -8px;
+            width: 0;
+            height: 0;
+            border-left: 16px solid var(--cyan);
+            border-top: 11px solid transparent;
+            border-bottom: 11px solid transparent;
+        }
+
+        @keyframes arrowFlow {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; transform: translateY(-50%) scaleX(1.2); }
+        }
+
+        .arrow-1 { left: 90px; }
+        .arrow-2 { left: 205px; }
+
+        .etl-particle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: var(--cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan);
+            animation: particleFlow 1.5s linear infinite;
+        }
+
+        @keyframes particleFlow {
+            0% { left: 30px; top: 50%; opacity: 0; transform: scale(0.5); }
+            10% { opacity: 1; transform: scale(1.2); }
+            50% { left: 170px; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1.2); }
+            100% { left: 310px; opacity: 0; transform: scale(0.5); }
+        }
+
+        /* OLAP Cube - Bigger and more animated */
+        .olap-cube {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            transform-style: preserve-3d;
+            animation: rotateCube 8s linear infinite;
+        }
+
+        @keyframes rotateCube {
+            0% { transform: rotateX(-20deg) rotateY(0deg) scale(1); }
+            25% { transform: rotateX(-25deg) rotateY(90deg) scale(1.05); }
+            50% { transform: rotateX(-15deg) rotateY(180deg) scale(1); }
+            75% { transform: rotateX(-25deg) rotateY(270deg) scale(1.05); }
+            100% { transform: rotateX(-20deg) rotateY(360deg) scale(1); }
+        }
+
+        .cube-face {
+            position: absolute;
+            width: 130px;
+            height: 130px;
+            border: 4px solid rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            animation: faceGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes faceGlow {
+            0%, 100% { box-shadow: inset 0 0 20px rgba(255,255,255,0.2); }
+            50% { box-shadow: inset 0 0 40px rgba(255,255,255,0.4); }
+        }
+
+        .cube-front { background: rgba(0, 102, 255, 0.9); transform: translateZ(65px); }
+        .cube-back { background: rgba(0, 102, 255, 0.9); transform: rotateY(180deg) translateZ(65px); }
+        .cube-right { background: rgba(0, 214, 143, 0.9); transform: rotateY(90deg) translateZ(65px); }
+        .cube-left { background: rgba(0, 214, 143, 0.9); transform: rotateY(-90deg) translateZ(65px); }
+        .cube-top { background: rgba(155, 81, 224, 0.9); transform: rotateX(90deg) translateZ(65px); }
+        .cube-bottom { background: rgba(155, 81, 224, 0.9); transform: rotateX(-90deg) translateZ(65px); }
+
+        /* Star Schema - Bigger and more animated */
+        .star-schema {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+
+        .star-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary), var(--cyan));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+            box-shadow: 0 10px 40px rgba(0, 102, 255, 0.5);
+            animation: centerPulse 2s ease-in-out infinite, centerRotate 6s ease-in-out infinite;
+        }
+
+        @keyframes centerPulse {
+            0%, 100% { box-shadow: 0 10px 40px rgba(0, 102, 255, 0.5); }
+            50% { box-shadow: 0 15px 60px rgba(0, 102, 255, 0.8), 0 0 50px rgba(0, 212, 255, 0.5); }
+        }
+
+        @keyframes centerRotate {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) rotate(5deg); }
+        }
+
+        .star-dim {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--secondary), #00E5A0);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 12px;
+            color: white;
+            box-shadow: 0 6px 20px rgba(0, 214, 143, 0.4);
+            cursor: grab;
+        }
+
+        .dim-1 { top: -10px; left: 50%; transform: translateX(-50%); animation: dimFloat 2.5s ease-in-out infinite, dimGlow 2s ease-in-out infinite; }
+        .dim-2 { top: 50%; right: -10px; transform: translateY(-50%); animation: dimFloat 2.5s ease-in-out infinite 0.4s, dimGlow 2s ease-in-out infinite 0.3s; }
+        .dim-3 { bottom: -10px; left: 50%; transform: translateX(-50%); animation: dimFloat 2.5s ease-in-out infinite 0.8s, dimGlow 2s ease-in-out infinite 0.6s; }
+        .dim-4 { top: 50%; left: -10px; transform: translateY(-50%); animation: dimFloat 2.5s ease-in-out infinite 1.2s, dimGlow 2s ease-in-out infinite 0.9s; }
+
+        @keyframes dimFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+        }
+
+        @keyframes dimGlow {
+            0%, 100% { box-shadow: 0 6px 20px rgba(0, 214, 143, 0.4); }
+            50% { box-shadow: 0 10px 35px rgba(0, 214, 143, 0.7), 0 0 25px rgba(0, 229, 160, 0.5); }
+        }
+
+        .star-connector {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform-origin: left center;
+            animation: connectorPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes connectorPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; box-shadow: 0 0 15px var(--cyan); }
+        }
+
+        .conn-1 { transform: rotate(-90deg) translateX(-40px); }
+        .conn-2 { transform: rotate(0deg) translateX(-40px); }
+        .conn-3 { transform: rotate(90deg) translateX(-40px); }
+        .conn-4 { transform: rotate(180deg) translateX(-40px); }
+
+        /* AI Brain - Bigger and more animated */
+        .ai-brain {
+            position: relative;
+            width: 250px;
+            height: 250px;
+        }
+
+        .brain-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 110px;
+            height: 110px;
+            background: linear-gradient(135deg, var(--purple), var(--primary));
+            border-radius: 50%;
+            box-shadow: 0 0 60px rgba(155, 81, 224, 0.6);
+            animation: brainPulse 1.5s ease-in-out infinite, brainRotate 10s linear infinite;
+        }
+
+        @keyframes brainPulse {
+            0%, 100% { box-shadow: 0 0 60px rgba(155, 81, 224, 0.6); transform: translate(-50%, -50%) scale(1); }
+            50% { box-shadow: 0 0 100px rgba(155, 81, 224, 0.9), 0 0 50px rgba(0, 212, 255, 0.5); transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        @keyframes brainRotate {
+            0% { background: linear-gradient(0deg, var(--purple), var(--primary)); }
+            50% { background: linear-gradient(180deg, var(--purple), var(--primary)); }
+            100% { background: linear-gradient(360deg, var(--purple), var(--primary)); }
+        }
+
+        .brain-node {
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background: var(--cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 25px var(--cyan), 0 0 50px var(--cyan);
+        }
+
+        .node-1 { top: 5%; left: 50%; transform: translateX(-50%); animation: nodeFloat 1.5s ease-in-out infinite; }
+        .node-2 { top: 25%; right: 5%; animation: nodeFloat 1.5s ease-in-out infinite 0.2s; }
+        .node-3 { bottom: 25%; right: 5%; animation: nodeFloat 1.5s ease-in-out infinite 0.4s; }
+        .node-4 { bottom: 5%; left: 50%; transform: translateX(-50%); animation: nodeFloat 1.5s ease-in-out infinite 0.6s; }
+        .node-5 { bottom: 25%; left: 5%; animation: nodeFloat 1.5s ease-in-out infinite 0.8s; }
+        .node-6 { top: 25%; left: 5%; animation: nodeFloat 1.5s ease-in-out infinite 1s; }
+
+        @keyframes nodeFloat {
+            0%, 100% { opacity: 0.6; transform: scale(1); box-shadow: 0 0 25px var(--cyan); }
+            50% { opacity: 1; transform: scale(1.4); box-shadow: 0 0 50px var(--cyan), 0 0 80px var(--cyan); }
+        }
+
+        .brain-connection {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            transform-origin: left center;
+            animation: connectionPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes connectionPulse {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; box-shadow: 0 0 20px var(--cyan); }
+        }
+
+        /* Chaos Icon - Bigger and more animated */
+        .chaos-icon {
+            position: relative;
+            width: 250px;
+            height: 220px;
+        }
+
+        .chaos-source {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            animation: chaosShake 0.3s ease-in-out infinite, chaosGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes chaosShake {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-8deg) scale(1.05); }
+            75% { transform: rotate(8deg) scale(1.05); }
+        }
+
+        @keyframes chaosGlow {
+            0%, 100% { box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+            50% { box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 30px currentColor; }
+        }
+
+        .chaos-1 { top: 15px; left: 15px; background: var(--danger); }
+        .chaos-2 { top: 15px; right: 15px; background: var(--accent); animation-delay: 0.1s; }
+        .chaos-3 { bottom: 15px; left: 15px; background: var(--purple); animation-delay: 0.2s; }
+        .chaos-4 { bottom: 15px; right: 15px; background: var(--secondary); animation-delay: 0.3s; }
+
+        .chaos-line {
+            position: absolute;
+            height: 3px;
+            background: var(--danger);
+            transform-origin: left center;
+            animation: chaosLine 0.8s ease-in-out infinite;
+        }
+
+        @keyframes chaosLine {
+            0%, 100% { opacity: 1; transform: scaleX(1); }
+            50% { opacity: 0.3; transform: scaleX(0.8); }
+        }
+
+        /* Gears - Bigger and more animated */
+        .gear-icon {
+            position: relative;
+            width: 220px;
+            height: 220px;
+        }
+
+        .gear {
+            position: absolute;
+            border-radius: 50%;
+            border: 12px solid;
+            animation: gearSpin 3s linear infinite;
+        }
+
+        .gear::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 35%;
+            height: 35%;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .gear::after {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 30px;
+            background: inherit;
+            border-radius: 5px;
+        }
+
+        .gear-1 {
+            width: 110px;
+            height: 110px;
+            top: 25px;
+            left: 25px;
+            border-color: var(--primary);
+            background: var(--primary);
+            box-shadow: 0 0 30px rgba(0, 102, 255, 0.5);
+        }
+
+        .gear-2 {
+            width: 85px;
+            height: 85px;
+            bottom: 25px;
+            right: 25px;
+            border-color: var(--secondary);
+            background: var(--secondary);
+            animation-direction: reverse;
+            animation-duration: 2s;
+            box-shadow: 0 0 30px rgba(0, 214, 143, 0.5);
+        }
+
+        @keyframes gearSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Chart Icon - Bigger and more animated */
+        .chart-icon {
+            position: relative;
+            width: 220px;
+            height: 180px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .chart-bar {
+            width: 35px;
+            background: linear-gradient(to top, var(--primary), var(--cyan));
+            border-radius: 8px 8px 0 0;
+            animation: barGrow 1.5s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(0, 102, 255, 0.3);
+        }
+
+        .bar-1 { height: 40%; animation-delay: 0s; }
+        .bar-2 { height: 70%; animation-delay: 0.15s; }
+        .bar-3 { height: 55%; animation-delay: 0.3s; }
+        .bar-4 { height: 90%; animation-delay: 0.45s; }
+        .bar-5 { height: 65%; animation-delay: 0.6s; }
+
+        @keyframes barGrow {
+            0%, 100% { opacity: 0.7; transform: scaleY(1); }
+            50% { opacity: 1; transform: scaleY(1.15); box-shadow: 0 0 40px rgba(0, 102, 255, 0.6); }
+        }
+
+        /* Stats Row - Bigger */
+        .stats-row {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 18px 28px;
+            border-radius: 16px;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            cursor: grab;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        /* Bigger stat values */
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-medium);
+            margin-top: 4px;
+        }
+
+        /* Flow Diagram - Bigger */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .flow-box {
+            background: linear-gradient(135deg, var(--primary), var(--cyan));
+            color: white;
+            padding: 16px 28px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 8px 30px rgba(0, 102, 255, 0.35);
+            cursor: grab;
+            transition: all 0.3s ease;
+        }
+
+        .flow-box:hover {
+            transform: scale(1.08);
+        }
+
+        .flow-arrow {
+            font-size: 2rem;
+            color: var(--primary);
+            animation: arrowPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% { transform: translateX(0); opacity: 0.7; }
+            50% { transform: translateX(8px); opacity: 1; }
+        }
+
+        /* List styles - Bigger */
+        .info-list {
+            text-align: left;
+            max-width: 900px;
+            margin: 15px auto;
+        }
+
+        .info-list li {
+            font-size: 1.15rem;
+            color: var(--text-medium);
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .info-list li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Title Icon - Bigger */
+        .title-icon {
+            font-size: 5rem;
+            margin-bottom: 15px;
+            animation: iconBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes iconBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.1); }
+        }
+
+        /* Highlight box - Bigger */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(0,102,255,0.1), rgba(155,81,224,0.1));
+            border-left: 5px solid var(--primary);
+            padding: 20px 28px;
+            border-radius: 0 14px 14px 0;
+            margin: 20px 0;
+            max-width: 900px;
+        }
+
+        .highlight-box p {
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Two column layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            width: 100%;
+            max-width: 1200px;
+            align-items: center;
+        }
+
+        .column-content {
+            text-align: left;
+        }
+
+        .column-content h3 {
+            margin-bottom: 15px;
+        }
+
+        .column-content p {
+            font-size: 1.1rem;
+            color: var(--text-medium);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        /* Comparison table - Bigger */
+        .comparison-table {
+            width: 100%;
+            max-width: 1000px;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 1.1rem;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            color: white;
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.15rem;
+        }
+
+        .comparison-table td {
+            padding: 14px 20px;
+            border-bottom: 1px solid #eee;
+            color: var(--text-medium);
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: rgba(0,102,255,0.03);
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(0,102,255,0.08);
+        }
+
+        /* Process steps - Bigger */
+        .process-steps {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .process-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 140px;
+        }
+
+        .step-number {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            box-shadow: 0 6px 20px rgba(0,102,255,0.35);
+            animation: stepPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes stepPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .step-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .step-connector {
+            width: 40px;
+            height: 3px;
+            background: var(--primary);
+            margin-top: 27px;
+        }
+    </style>
+</head>
+<body>
+    <div class="tooltip" id="tooltip">
+        <div class="tooltip-title"></div>
+        <div class="tooltip-content"></div>
+    </div>
+
+    <div class="slideshow" id="slideshow">
+        <!-- SLIDE 1: Title - REMOVED HORMtech reference -->
+        <div class="slide active" id="slide-1">
+            <div class="section-indicator section-blue"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">1 / 28</div>
+                <div class="icon-container">
+                    <div class="warehouse-icon">
+                        <div class="warehouse-roof"></div>
+                        <div class="warehouse-building"></div>
+                        <div class="warehouse-window wh-win-1"></div>
+                        <div class="warehouse-window wh-win-2"></div>
+                        <div class="warehouse-window wh-win-3"></div>
+                        <div class="warehouse-window wh-win-4"></div>
+                        <div class="warehouse-window wh-win-5"></div>
+                        <div class="warehouse-window wh-win-6"></div>
+                    </div>
+                </div>
+                <h1>Data Warehouse</h1>
+                <h2>Transformer les Données en Intelligence</h2>
+                <!-- Removed HORMtech reference -->
+                <p class="subtitle">Vers une prise de décision basée sur les données</p>
+                <div class="stats-row">
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">5</div>
+                        <div class="stat-label">Orateurs</div>
+                    </div>
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">28</div>
+                        <div class="stat-label">Diapositives</div>
+                    </div>
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">∞</div>
+                        <div class="stat-label">Potentiel</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Speaker 1 - Context -->
+        <div class="slide" id="slide-2">
+            <div class="section-indicator section-blue"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">2 / 28</div>
+                <div class="speaker-badge speaker-1">Orateur 1</div>
+                <h2>L'Ère des Données</h2>
+                <p class="subtitle">Comprendre l'importance critique des données dans le monde moderne</p>
+                <div class="content-grid content-grid-3">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #0066FF, #00D4FF);">📊</div>
+                        <div class="card-title">Explosion des Données</div>
+                        <div class="card-text">Le volume de données mondiales double tous les 2 ans. Les entreprises génèrent des <span class="keyword" data-title="Big Data" data-content="Ensembles de données volumineux caractérisés par les 3V : Volume (quantité), Vélocité (vitesse), Variété (types). Nécessite des outils spécialisés pour le traitement.">Big Data</span> à une vitesse sans précédent.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #00D68F, #00E5A0);">💰</div>
+                        <div class="card-title">Valeur Stratégique</div>
+                        <div class="card-text">Les données sont le « nouveau pétrole ». Elles représentent un <span class="keyword" data-title="Actif Stratégique" data-content="Ressource d'entreprise qui crée un avantage compétitif durable. Les données bien gérées permettent une meilleure compréhension du marché et des clients.">actif stratégique</span> majeur pour toute organisation.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #9B51E0, #7B3DC9);">🎯</div>
+                        <div class="card-title">Décisions Éclairées</div>
+                        <div class="card-text">Une entreprise <span class="keyword" data-title="Data-Driven" data-content="Approche organisationnelle où les décisions sont basées sur l'analyse de données plutôt que sur l'intuition. Améliore la précision et réduit les risques.">data-driven</span> prend des décisions 5x plus rapides et précises que ses concurrents.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Speaker 1 - Problem - REMOVED HORMtech -->
+        <div class="slide" id="slide-3">
+            <div class="section-indicator section-blue"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">3 / 28</div>
+                <div class="speaker-badge speaker-1">Orateur 1</div>
+                <!-- Removed HORMtech from title -->
+                <h2>Le Problème des Entreprises</h2>
+                <p class="subtitle">Des organisations noyées dans leurs propres données</p>
+                <div class="two-column">
+                    <div class="column-content">
+                        <h3 style="color: var(--danger);">Situation Actuelle</h3>
+                        <ul class="info-list">
+                            <li>Multiples <span class="keyword" data-title="Sources de Données" data-content="Points d'origine des données : ERP, CRM, fichiers Excel, bases SQL, APIs externes, etc. La multiplication des sources crée des silos d'information.">sources de données</span> isolées</li>
+                            <li>Incohérences entre les rapports</li>
+                            <li>Temps de génération des rapports : 3+ jours</li>
+                            <li>Données dupliquées et contradictoires</li>
+                            <li>Décisions basées sur des informations obsolètes</li>
+                        </ul>
+                    </div>
+                    <div class="icon-container" style="width: 280px; height: 240px;">
+                        <div class="chaos-icon">
+                            <div class="chaos-source chaos-1">📁</div>
+                            <div class="chaos-source chaos-2">📊</div>
+                            <div class="chaos-source chaos-3">🗄️</div>
+                            <div class="chaos-source chaos-4">📈</div>
+                            <div class="chaos-line" style="width: 80px; top: 50%; left: 60px; transform: rotate(30deg);"></div>
+                            <div class="chaos-line" style="width: 70px; top: 40%; right: 60px; transform: rotate(-20deg);"></div>
+                            <div class="chaos-line" style="width: 90px; bottom: 40%; left: 50%; transform: rotate(45deg);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Speaker 1 - OLTP Limitations -->
+        <div class="slide" id="slide-4">
+            <div class="section-indicator section-blue"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">4 / 28</div>
+                <div class="speaker-badge speaker-1">Orateur 1</div>
+                <h2>Limites des Systèmes <span class="keyword" data-title="OLTP" data-content="Online Transaction Processing - Systèmes optimisés pour les transactions quotidiennes : ventes, commandes, mises à jour de stock. Non conçus pour l'analyse.">OLTP</span></h2>
+                <p class="subtitle">Pourquoi les bases de données opérationnelles ne suffisent pas pour l'analyse</p>
+                <div class="content-grid content-grid-2">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #FF3D71, #FF6B6B);">⚠️</div>
+                        <div class="card-title">Conçus pour les Transactions</div>
+                        <div class="card-text">Les systèmes <span class="keyword" data-title="Transactionnel" data-content="Système optimisé pour les opérations CRUD (Create, Read, Update, Delete) rapides sur de petits ensembles de données. Exemple : passer une commande.">transactionnels</span> sont optimisés pour des opérations simples et rapides, pas pour des analyses complexes sur des millions d'enregistrements.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #FF8C00, #FFD600);">🐌</div>
+                        <div class="card-title">Performance Dégradée</div>
+                        <div class="card-text">Les requêtes analytiques sur un système <span class="keyword" data-title="Production" data-content="Environnement où tournent les applications critiques de l'entreprise. La surcharge peut impacter les opérations quotidiennes.">production</span> peuvent ralentir considérablement les opérations quotidiennes.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #0066FF, #00D4FF);">📅</div>
+                        <div class="card-title">Pas d'Historique</div>
+                        <div class="card-text">Les systèmes OLTP conservent généralement uniquement les données actuelles. L'<span class="keyword" data-title="Historisation" data-content="Conservation des états passés des données pour permettre l'analyse des tendances et la comparaison dans le temps.">historisation</span> nécessaire pour l'analyse est absente.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #9B51E0, #7B3DC9);">🔀</div>
+                        <div class="card-title">Données Fragmentées</div>
+                        <div class="card-text">Chaque système possède son propre <span class="keyword" data-title="Schéma de Données" data-content="Structure définissant comment les données sont organisées dans une base : tables, colonnes, relations. Varie d'un système à l'autre.">schéma</span>, rendant la consolidation manuelle laborieuse et source d'erreurs.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Speaker 1 - Conclusion -->
+        <div class="slide" id="slide-5">
+            <div class="section-indicator section-blue"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">5 / 28</div>
+                <div class="speaker-badge speaker-1">Orateur 1</div>
+                <h2>Conclusion : Besoin Urgent</h2>
+                <p class="subtitle">Une solution analytique s'impose</p>
+                <div class="highlight-box" style="max-width: 1000px;">
+                    <p style="font-size: 1.4rem;">« Les données sont partout, mais l'<span class="keyword" data-title="Intelligence d'Affaires" data-content="Business Intelligence (BI) - Ensemble de technologies et pratiques pour collecter, intégrer, analyser et présenter les données d'entreprise pour améliorer la prise de décision.">intelligence</span> nulle part. Il est temps de transformer ce chaos en clarté. »</p>
+                </div>
+                <div class="stats-row" style="margin-top: 30px;">
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">73%</div>
+                        <div class="stat-label">Données non exploitées</div>
+                    </div>
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">3+ jours</div>
+                        <div class="stat-label">Pour un rapport</div>
+                    </div>
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">40%</div>
+                        <div class="stat-label">Erreurs dans les rapports</div>
+                    </div>
+                </div>
+                <p class="subtitle" style="margin-top: 25px;"><strong>Prochaine section :</strong> La solution — Le Data Warehouse</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Speaker 2 - What is DW -->
+        <div class="slide" id="slide-6">
+            <div class="section-indicator section-green"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">6 / 28</div>
+                <div class="speaker-badge speaker-2">Orateur 2</div>
+                <h2>Qu'est-ce qu'un Data Warehouse ?</h2>
+                <p class="subtitle">La solution centralisée pour l'intelligence d'entreprise</p>
+                <div class="two-column">
+                    <div class="icon-container" style="width: 280px; height: 240px;">
+                        <div class="warehouse-icon">
+                            <div class="warehouse-roof"></div>
+                            <div class="warehouse-building"></div>
+                            <div class="warehouse-window wh-win-1"></div>
+                            <div class="warehouse-window wh-win-2"></div>
+                            <div class="warehouse-window wh-win-3"></div>
+                            <div class="warehouse-window wh-win-4"></div>
+                            <div class="warehouse-window wh-win-5"></div>
+                            <div class="warehouse-window wh-win-6"></div>
+                        </div>
+                    </div>
+                    <div class="column-content">
+                        <h3>Définition</h3>
+                        <p>Un <span class="keyword" data-title="Data Warehouse" data-content="Selon Bill Inmon : « Un entrepôt de données est une collection de données orientées sujet, intégrées, non volatiles et historisées, organisées pour le support d'un processus d'aide à la décision. »">Data Warehouse</span> est un système de stockage centralisé qui consolide les données de multiples sources pour permettre l'analyse et le reporting.</p>
+                        <p>Il sert de <span class="keyword" data-title="Single Source of Truth (SSOT)" data-content="Source unique de vérité : référentiel central où toutes les données sont cohérentes et fiables. Élimine les contradictions entre différentes sources.">source unique de vérité</span> pour toute l'organisation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: Speaker 2 - Bill Inmon Principles -->
+        <div class="slide" id="slide-7">
+            <div class="section-indicator section-green"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">7 / 28</div>
+                <div class="speaker-badge speaker-2">Orateur 2</div>
+                <h2>Les 4 Principes de <span class="keyword" data-title="Bill Inmon" data-content="Considéré comme le « Père du Data Warehousing ». Il a défini les principes fondamentaux des entrepôts de données dans les années 1990.">Bill Inmon</span></h2>
+                <p class="subtitle">Les fondements théoriques du Data Warehouse</p>
+                <div class="content-grid content-grid-2">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #0066FF, #00D4FF);">🔗</div>
+                        <div class="card-title">1. Intégré</div>
+                        <div class="card-text">Les données provenant de sources hétérogènes sont <span class="keyword" data-title="Intégration des Données" data-content="Processus de combinaison de données de différentes sources en une vue unifiée. Inclut la résolution des conflits de nommage, formats et unités.">unifiées</span> avec des conventions communes : formats, nommage, unités de mesure standardisés.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #00D68F, #00E5A0);">🎯</div>
+                        <div class="card-title">2. Orienté Sujet</div>
+                        <div class="card-text">Organisé autour des <span class="keyword" data-title="Domaines Métier" data-content="Sujets clés de l'entreprise : Ventes, Clients, Produits, Finance. Contrairement aux systèmes OLTP organisés par processus.">domaines métier</span> majeurs plutôt que par applications ou processus opérationnels.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #9B51E0, #7B3DC9);">📅</div>
+                        <div class="card-title">3. Historisé (Time-Variant)</div>
+                        <div class="card-text">Les données sont stockées avec une <span class="keyword" data-title="Dimension Temporelle" data-content="Chaque enregistrement est horodaté. Permet l'analyse des tendances sur plusieurs années et la comparaison historique.">dimension temporelle</span>. L'historique permet l'analyse des tendances sur 5-10+ ans.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #FF8C00, #FFD600);">🔒</div>
+                        <div class="card-title">4. Non-Volatile</div>
+                        <div class="card-text">Les données sont <span class="keyword" data-title="Non-Volatilité" data-content="Les données chargées ne sont jamais modifiées ou supprimées. Seules les insertions sont permises, garantissant l'intégrité historique.">permanentes</span>. Une fois chargées, elles ne sont ni modifiées ni supprimées — seulement ajoutées.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: Speaker 2 - OLTP vs OLAP -->
+        <div class="slide" id="slide-8">
+            <div class="section-indicator section-green"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">8 / 28</div>
+                <div class="speaker-badge speaker-2">Orateur 2</div>
+                <h2>OLTP vs OLAP</h2>
+                <p class="subtitle">Deux approches complémentaires pour des besoins différents</p>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Critère</th>
+                        <th><span class="keyword" data-title="OLTP" data-content="Online Transaction Processing - Traitement transactionnel en ligne pour les opérations quotidiennes.">OLTP</span></th>
+                        <th><span class="keyword" data-title="OLAP" data-content="Online Analytical Processing - Traitement analytique en ligne pour l'aide à la décision et le reporting.">OLAP</span></th>
+                    </tr>
+                    <tr>
+                        <td><strong>Objectif</strong></td>
+                        <td>Opérations quotidiennes</td>
+                        <td>Analyse et décision</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Type de requêtes</strong></td>
+                        <td>Simples, répétitives</td>
+                        <td>Complexes, ad-hoc</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Volume par requête</strong></td>
+                        <td>Quelques lignes</td>
+                        <td>Millions de lignes</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Utilisateurs</strong></td>
+                        <td>Employés opérationnels</td>
+                        <td>Analystes, managers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Schéma</strong></td>
+                        <td>Normalisé (3NF)</td>
+                        <td>Dénormalisé (Star/Snowflake)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Historique</strong></td>
+                        <td>Données courantes</td>
+                        <td>Années d'historique</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: Speaker 2 - Architecture -->
+        <div class="slide" id="slide-9">
+            <div class="section-indicator section-green"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">9 / 28</div>
+                <div class="speaker-badge speaker-2">Orateur 2</div>
+                <h2>Architecture Data Warehouse</h2>
+                <p class="subtitle">Comment les données circulent vers l'entrepôt</p>
+                <div class="flow-diagram">
+                    <div class="flow-box" draggable="true">Sources</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" draggable="true" style="background: linear-gradient(135deg, var(--accent), var(--highlight));">ETL</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" draggable="true" style="background: linear-gradient(135deg, var(--secondary), #00E5A0);">Data Warehouse</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box" draggable="true" style="background: linear-gradient(135deg, var(--purple), #7B3DC9);">Reporting / BI</div>
+                </div>
+                <div class="highlight-box">
+                    <p>Le processus <span class="keyword" data-title="ETL" data-content="Extract, Transform, Load - Processus en trois étapes pour alimenter le Data Warehouse : extraction des sources, transformation/nettoyage, chargement dans l'entrepôt.">ETL</span> est le cœur de l'alimentation du Data Warehouse. Il assure la qualité et la cohérence des données avant leur stockage.</p>
+                </div>
+                <p class="subtitle" style="margin-top: 20px;"><strong>Prochaine section :</strong> Exploration détaillée du processus ETL</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: Speaker 3 - ETL Introduction -->
+        <div class="slide" id="slide-10">
+            <div class="section-indicator section-red"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">10 / 28</div>
+                <div class="speaker-badge speaker-3">Orateur 3</div>
+                <h2>Le Processus ETL</h2>
+                <p class="subtitle">Extract - Transform - Load : Le pipeline de données</p>
+                <div class="icon-container" style="width: 360px; height: 220px;">
+                    <div class="etl-icon">
+                        <div class="etl-box etl-extract">E</div>
+                        <div class="etl-arrow arrow-1"></div>
+                        <div class="etl-box etl-transform">T</div>
+                        <div class="etl-arrow arrow-2"></div>
+                        <div class="etl-box etl-load">L</div>
+                        <div class="etl-particle" style="animation-delay: 0s;"></div>
+                        <div class="etl-particle" style="animation-delay: 0.5s;"></div>
+                        <div class="etl-particle" style="animation-delay: 1s;"></div>
+                    </div>
+                </div>
+                <div class="content-grid content-grid-3">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #FF3D71, #FF6B6B);">📥</div>
+                        <div class="card-title"><span class="keyword" data-title="Extract (Extraction)" data-content="Première phase ETL : récupération des données depuis les systèmes sources (bases de données, fichiers, APIs) de manière incrémentale ou complète.">Extract</span></div>
+                        <div class="card-text">Récupération des données brutes depuis toutes les sources identifiées.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #FFD600, #FF8C00);">🔄</div>
+                        <div class="card-title"><span class="keyword" data-title="Transform (Transformation)" data-content="Deuxième phase ETL : nettoyage, standardisation, enrichissement et application des règles métier aux données extraites.">Transform</span></div>
+                        <div class="card-text">Nettoyage, standardisation et application des règles métier.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #00D68F, #00E5A0);">📤</div>
+                        <div class="card-title"><span class="keyword" data-title="Load (Chargement)" data-content="Troisième phase ETL : insertion des données transformées dans le Data Warehouse selon une planification définie.">Load</span></div>
+                        <div class="card-text">Chargement structuré des données dans le Data Warehouse.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: Speaker 3 - Extraction -->
+        <div class="slide" id="slide-11">
+            <div class="section-indicator section-red"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">11 / 28</div>
+                <div class="speaker-badge speaker-3">Orateur 3</div>
+                <h2>Phase 1 : Extraction</h2>
+                <p class="subtitle">Récupérer les données depuis les sources hétérogènes</p>
+                <div class="content-grid content-grid-2">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #0066FF, #00D4FF);">🔄</div>
+                        <div class="card-title">Extraction Complète</div>
+                        <div class="card-text"><span class="keyword" data-title="Full Load" data-content="Chargement complet de toutes les données à chaque exécution. Simple mais coûteux en temps et ressources pour les grandes tables.">Full Load</span> : Toutes les données sont extraites à chaque fois. Utilisé pour les petites tables ou les chargements initiaux.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #00D68F, #00E5A0);">⚡</div>
+                        <div class="card-title">Extraction Incrémentale</div>
+                        <div class="card-text"><span class="keyword" data-title="Incremental Load" data-content="Seules les données modifiées depuis la dernière extraction sont récupérées. Utilise des horodatages ou CDC pour identifier les changements.">Incremental</span> : Seules les données modifiées depuis la dernière extraction. Plus efficace pour les grandes tables.</div>
+                    </div>
+                    <div class="content-card" draggable="true" style="grid-column: span 2;">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #9B51E0, #7B3DC9);">📡</div>
+                        <div class="card-title">CDC - Change Data Capture</div>
+                        <div class="card-text"><span class="keyword" data-title="Change Data Capture (CDC)" data-content="Technique qui capture uniquement les changements (INSERT, UPDATE, DELETE) dans les bases de données sources. Utilise les logs de transaction ou triggers. Minimise la charge sur les systèmes sources.">CDC</span> est une technique avancée qui capture les changements en temps réel depuis les logs de transaction. Elle minimise l'impact sur les systèmes sources et permet une quasi-synchronisation en temps réel.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12: Speaker 3 - Transformation -->
+        <div class="slide" id="slide-12">
+            <div class="section-indicator section-red"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">12 / 28</div>
+                <div class="speaker-badge speaker-3">Orateur 3</div>
+                <h2>Phase 2 : Transformation</h2>
+                <p class="subtitle">Nettoyer et préparer les données pour l'analyse</p>
+                <div class="content-grid content-grid-2">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #FF3D71, #FF6B6B);">🧹</div>
+                        <div class="card-title">Nettoyage</div>
+                        <div class="card-text"><span class="keyword" data-title="Data Cleansing" data-content="Processus de détection et correction des erreurs : valeurs nulles, doublons, formats incorrects, données aberrantes.">Nettoyage des données</span> : suppression des doublons, gestion des valeurs nulles, correction des erreurs.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #0066FF, #00D4FF);">📏</div>
+                        <div class="card-title">Standardisation</div>
+                        <div class="card-text"><span class="keyword" data-title="Standardisation" data-content="Uniformisation des formats de données : dates (YYYY-MM-DD), devises (EUR), unités de mesure, codes pays, etc.">Uniformisation</span> des formats : dates, devises, codes, unités de mesure à travers toutes les sources.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #00D68F, #00E5A0);">📊</div>
+                        <div class="card-title">Agrégation</div>
+                        <div class="card-text"><span class="keyword" data-title="Agrégation" data-content="Calcul de métriques résumées : totaux, moyennes, comptes. Pré-calcule les résultats fréquemment demandés pour optimiser les performances.">Calcul des agrégats</span> : sommes, moyennes, comptages pour optimiser les requêtes analytiques.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #9B51E0, #7B3DC9);">⚙️</div>
+                        <div class="card-title">Règles Métier</div>
+                        <div class="card-text">Application des <span class="keyword" data-title="Règles Métier" data-content="Logique spécifique à l'entreprise : calcul de KPIs, classifications, segmentations, dérivations de données.">règles métier</span> : calculs de KPIs, dérivations, classifications personnalisées.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 13: Speaker 3 - SCD -->
+        <div class="slide" id="slide-13">
+            <div class="section-indicator section-red"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">13 / 28</div>
+                <div class="speaker-badge speaker-3">Orateur 3</div>
+                <h2><span class="keyword" data-title="Slowly Changing Dimensions" data-content="Techniques pour gérer l'évolution des données de dimension dans le temps. Permet de suivre les changements historiques des attributs.">SCD</span> - Slowly Changing Dimensions</h2>
+                <p class="subtitle">Gérer l'évolution des données dans le temps</p>
+                <div class="content-grid content-grid-2">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #0066FF, #00D4FF);">1️⃣</div>
+                        <div class="card-title"><span class="keyword" data-title="SCD Type 1" data-content="Écrase l'ancienne valeur. Simple mais perd l'historique. Utilisé pour corriger des erreurs ou des données non importantes historiquement.">SCD Type 1</span></div>
+                        <div class="card-text">
+                            <strong>Écrasement :</strong> L'ancienne valeur est remplacée par la nouvelle.<br><br>
+                            <em>Exemple :</em> Correction d'une faute d'orthographe dans un nom.<br><br>
+                            <strong>Avantage :</strong> Simple<br>
+                            <strong>Inconvénient :</strong> Pas d'historique
+                        </div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #00D68F, #00E5A0);">2️⃣</div>
+                        <div class="card-title"><span class="keyword" data-title="SCD Type 2" data-content="Crée une nouvelle ligne pour chaque changement avec dates de validité. Préserve l'historique complet. Standard du Data Warehousing.">SCD Type 2</span></div>
+                        <div class="card-text">
+                            <strong>Historisation :</strong> Nouvelle ligne créée avec dates de validité.<br><br>
+                            <em>Exemple :</em> Client qui change d'adresse → 2 lignes.<br><br>
+                            <strong>Avantage :</strong> Historique complet<br>
+                            <strong>Inconvénient :</strong> Volume de données
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 14: Speaker 3 - Load -->
+        <div class="slide" id="slide-14">
+            <div class="section-indicator section-red"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">14 / 28</div>
+                <div class="speaker-badge speaker-3">Orateur 3</div>
+                <h2>Phase 3 : Chargement</h2>
+                <p class="subtitle">Insérer les données transformées dans le Data Warehouse</p>
+                <div class="content-grid content-grid-3">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #0066FF, #00D4FF);">📦</div>
+                        <div class="card-title"><span class="keyword" data-title="Incremental Load" data-content="Chargement des seules données nouvelles ou modifiées. Plus rapide et moins gourmand en ressources que le chargement complet.">Chargement Incrémental</span></div>
+                        <div class="card-text">Seules les nouvelles données ou modifications sont insérées, optimisant les temps de traitement.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #00D68F, #00E5A0);">📑</div>
+                        <div class="card-title"><span class="keyword" data-title="Partitionnement" data-content="Division des tables en segments plus petits basés sur une clé (date, région). Améliore les performances des requêtes et la maintenance.">Partitionnement</span></div>
+                        <div class="card-text">Les tables sont divisées par période (mois, année) pour des requêtes plus rapides et une maintenance simplifiée.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #9B51E0, #7B3DC9);">⏰</div>
+                        <div class="card-title"><span class="keyword" data-title="Planification ETL" data-content="Ordonnancement des jobs ETL selon un calendrier défini. Généralement nocturne pour ne pas impacter les systèmes sources.">Planification</span></div>
+                        <div class="card-text">Jobs planifiés (nuit/weekend) avec gestion des dépendances et des erreurs.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 15: Speaker 3 - SSOT -->
+        <div class="slide" id="slide-15">
+            <div class="section-indicator section-red"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">15 / 28</div>
+                <div class="speaker-badge speaker-3">Orateur 3</div>
+                <h2>Résultat : <span class="keyword" data-title="Single Source of Truth" data-content="Source unique de vérité - L'objectif ultime du Data Warehouse : un référentiel central, fiable et cohérent pour toutes les décisions d'entreprise.">Single Source of Truth</span></h2>
+                <p class="subtitle">L'objectif ultime du processus ETL</p>
+                <div class="two-column">
+                    <div class="icon-container" style="width: 280px; height: 260px;">
+                        <div class="database-icon">
+                            <div class="db-cylinder db-cyl-1"></div>
+                            <div class="db-cylinder db-cyl-2"></div>
+                            <div class="db-cylinder db-cyl-3"></div>
+                            <div class="db-data-stream db-stream-1"></div>
+                            <div class="db-data-stream db-stream-2"></div>
+                            <div class="db-data-stream db-stream-3"></div>
+                        </div>
+                    </div>
+                    <div class="column-content">
+                        <h3 style="color: var(--secondary);">Bénéfices</h3>
+                        <ul class="info-list">
+                            <li>Données <span class="keyword" data-title="Cohérence" data-content="Absence de contradictions entre les données. Tous les utilisateurs voient les mêmes chiffres, quelle que soit la source d'origine.">cohérentes</span> et fiables</li>
+                            <li>Fin des conflits entre rapports</li>
+                            <li>Base solide pour l'analytique</li>
+                            <li>Confiance dans les décisions</li>
+                            <li>Audit trail complet</li>
+                        </ul>
+                        <p style="margin-top: 15px;"><strong>Prochaine section :</strong> Modélisation dimensionnelle & OLAP</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 16: Speaker 4 - Dimensional Modeling -->
+        <div class="slide" id="slide-16">
+            <div class="section-indicator section-yellow"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">16 / 28</div>
+                <div class="speaker-badge speaker-4">Orateur 4</div>
+                <h2>Modélisation Dimensionnelle</h2>
+                <p class="subtitle">L'approche <span class="keyword" data-title="Ralph Kimball" data-content="Expert reconnu du Data Warehousing, créateur de la méthodologie dimensionnelle. Son approche 'bottom-up' se concentre sur les besoins métier.">Kimball</span> pour l'analyse</p>
+                <div class="content-grid content-grid-2">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #0066FF, #00D4FF);">📊</div>
+                        <div class="card-title"><span class="keyword" data-title="Table de Faits" data-content="Table centrale contenant les mesures numériques de l'activité : ventes, quantités, montants. Granularité fine (une ligne par transaction).">Table de Faits (Fact)</span></div>
+                        <div class="card-text">
+                            Contient les <strong>mesures</strong> numériques de l'activité :<br>
+                            • Montant des ventes<br>
+                            • Quantités vendues<br>
+                            • Coûts, marges, profits<br><br>
+                            <em>Granularité fine : 1 ligne = 1 transaction</em>
+                        </div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #00D68F, #00E5A0);">🏷️</div>
+                        <div class="card-title"><span class="keyword" data-title="Table de Dimension" data-content="Tables descriptives qui contextualisent les faits : Qui (Client), Quoi (Produit), Quand (Temps), Où (Géographie).">Tables de Dimensions</span></div>
+                        <div class="card-text">
+                            Fournissent le <strong>contexte</strong> descriptif :<br>
+                            • Dim_Client (nom, segment, région)<br>
+                            • Dim_Produit (catégorie, marque)<br>
+                            • Dim_Temps (date, mois, trimestre)<br><br>
+                            <em>« Qui, Quoi, Quand, Où »</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 17: Speaker 4 - Star Schema -->
+        <div class="slide" id="slide-17">
+            <div class="section-indicator section-yellow"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">17 / 28</div>
+                <div class="speaker-badge speaker-4">Orateur 4</div>
+                <h2><span class="keyword" data-title="Star Schema" data-content="Schéma en étoile : modèle de base de données avec une table de faits centrale connectée directement aux tables de dimensions. Simple et performant.">Star Schema</span> - Schéma en Étoile</h2>
+                <p class="subtitle">La structure standard du Data Warehouse analytique</p>
+                <div class="two-column">
+                    <div class="icon-container" style="width: 320px; height: 320px;">
+                        <div class="star-schema">
+                            <div class="star-connector conn-1"></div>
+                            <div class="star-connector conn-2"></div>
+                            <div class="star-connector conn-3"></div>
+                            <div class="star-connector conn-4"></div>
+                            <div class="star-center">FACT<br>Ventes</div>
+                            <div class="star-dim dim-1">Temps</div>
+                            <div class="star-dim dim-2">Produit</div>
+                            <div class="star-dim dim-3">Client</div>
+                            <div class="star-dim dim-4">Magasin</div>
+                        </div>
+                    </div>
+                    <div class="column-content">
+                        <h3>Avantages</h3>
+                        <ul class="info-list">
+                            <li>Requêtes <span class="keyword" data-title="Performance" data-content="Les jointures simples entre facts et dimensions permettent des temps de réponse rapides même sur des millions de lignes.">performantes</span></li>
+                            <li>Structure intuitive et facile à comprendre</li>
+                            <li>Jointures simples (max 1 niveau)</li>
+                            <li>Idéal pour les outils BI</li>
+                            <li>Maintenance simplifiée</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 18: Speaker 4 - OLAP Cube -->
+        <div class="slide" id="slide-18">
+            <div class="section-indicator section-yellow"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">18 / 28</div>
+                <div class="speaker-badge speaker-4">Orateur 4</div>
+                <h2><span class="keyword" data-title="OLAP Cube" data-content="Structure de données multidimensionnelle pré-calculée permettant une analyse rapide selon plusieurs axes : temps, produit, géographie, etc.">Cube OLAP</span></h2>
+                <p class="subtitle">Analyse multidimensionnelle des données</p>
+                <div class="two-column">
+                    <div class="icon-container" style="width: 240px; height: 240px; perspective: 1000px;">
+                        <div class="olap-cube">
+                            <div class="cube-face cube-front">Temps</div>
+                            <div class="cube-face cube-back">Temps</div>
+                            <div class="cube-face cube-right">Produit</div>
+                            <div class="cube-face cube-left">Produit</div>
+                            <div class="cube-face cube-top">Client</div>
+                            <div class="cube-face cube-bottom">Client</div>
+                        </div>
+                    </div>
+                    <div class="column-content">
+                        <h3>Concept</h3>
+                        <p>Un cube OLAP permet d'analyser les données selon <span class="keyword" data-title="Dimensions d'Analyse" data-content="Axes selon lesquels les données sont analysées : temps, géographie, produit, client, etc. Chaque dimension peut avoir plusieurs niveaux de hiérarchie.">plusieurs dimensions</span> simultanément avec des performances optimales.</p>
+                        <p>Les mesures sont pré-agrégées pour des réponses instantanées.</p>
+                        <h3 style="margin-top: 15px;">Exemple</h3>
+                        <p><em>« Ventes par produit, par région, par trimestre »</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 19: Speaker 4 - OLAP Operations -->
+        <div class="slide" id="slide-19">
+            <div class="section-indicator section-yellow"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">19 / 28</div>
+                <div class="speaker-badge speaker-4">Orateur 4</div>
+                <h2>Opérations OLAP</h2>
+                <p class="subtitle">Naviguer dans les données multidimensionnelles</p>
+                <div class="content-grid content-grid-2">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #0066FF, #00D4FF);">🔍</div>
+                        <div class="card-title"><span class="keyword" data-title="Drill Down" data-content="Navigation vers un niveau de détail plus fin. Ex: Année → Trimestre → Mois → Jour">Drill Down</span> / <span class="keyword" data-title="Roll Up" data-content="Navigation vers un niveau plus agrégé. Ex: Jour → Mois → Trimestre → Année">Roll Up</span></div>
+                        <div class="card-text">
+                            <strong>Drill Down :</strong> Descendre dans la hiérarchie<br>
+                            <em>Année → Trimestre → Mois</em><br><br>
+                            <strong>Roll Up :</strong> Remonter dans la hiérarchie<br>
+                            <em>Mois → Trimestre → Année</em>
+                        </div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #00D68F, #00E5A0);">✂️</div>
+                        <div class="card-title"><span class="keyword" data-title="Slice" data-content="Sélection d'une tranche du cube en fixant une dimension. Ex: Ventes uniquement pour Q1 2024.">Slice</span> / <span class="keyword" data-title="Dice" data-content="Sélection d'un sous-cube en filtrant sur plusieurs dimensions. Ex: Ventes Q1-Q2 2024, Région Nord, Catégorie A.">Dice</span></div>
+                        <div class="card-text">
+                            <strong>Slice :</strong> Couper une « tranche »<br>
+                            <em>Fixer Temps = « Q1 2024 »</em><br><br>
+                            <strong>Dice :</strong> Extraire un sous-cube<br>
+                            <em>Filtrer sur plusieurs dimensions</em>
+                        </div>
+                    </div>
+                    <div class="content-card" draggable="true" style="grid-column: span 2;">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #9B51E0, #7B3DC9);">🔄</div>
+                        <div class="card-title"><span class="keyword" data-title="Pivot" data-content="Rotation du cube pour voir les données sous un angle différent. Change les axes lignes/colonnes de l'analyse.">Pivot</span> (Rotation)</div>
+                        <div class="card-text">Réorienter la vue en échangeant les axes. Passer de « Ventes par Produit » à « Ventes par Région » instantanément. Permet d'explorer les données sous différents angles sans recalcul.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 20: Speaker 4 - Benefits -->
+        <div class="slide" id="slide-20">
+            <div class="section-indicator section-yellow"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">20 / 28</div>
+                <div class="speaker-badge speaker-4">Orateur 4</div>
+                <h2>Avantages de la Modélisation OLAP</h2>
+                <p class="subtitle">Pourquoi cette approche est incontournable</p>
+                <div class="stats-row">
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">< 1s</div>
+                        <div class="stat-label">Temps de réponse</div>
+                    </div>
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">∞</div>
+                        <div class="stat-label">Dimensions d'analyse</div>
+                    </div>
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">Self</div>
+                        <div class="stat-label">Service BI</div>
+                    </div>
+                </div>
+                <div class="content-grid content-grid-3" style="margin-top: 20px;">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #0066FF, #00D4FF);">⚡</div>
+                        <div class="card-title">Requêtes Rapides</div>
+                        <div class="card-text">Agrégations pré-calculées = réponses instantanées même sur des milliards de lignes.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #00D68F, #00E5A0);">🎯</div>
+                        <div class="card-title">Analyse Flexible</div>
+                        <div class="card-text">Explorez les données sous tous les angles sans demander l'aide de l'IT.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #9B51E0, #7B3DC9);">📈</div>
+                        <div class="card-title">Base pour l'IA</div>
+                        <div class="card-text">Structure idéale pour alimenter les modèles de Machine Learning.</div>
+                    </div>
+                </div>
+                <p class="subtitle" style="margin-top: 20px;"><strong>Prochaine section :</strong> Intelligence Artificielle & Résultats</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 21: Speaker 5 - AI Introduction -->
+        <div class="slide" id="slide-21">
+            <div class="section-indicator section-purple"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">21 / 28</div>
+                <div class="speaker-badge speaker-5">Orateur 5</div>
+                <h2>Data Warehouse + Intelligence Artificielle</h2>
+                <p class="subtitle">Débloquer le potentiel des données avec le <span class="keyword" data-title="Machine Learning" data-content="Sous-domaine de l'IA où les algorithmes apprennent des patterns à partir des données sans être explicitement programmés.">Machine Learning</span></p>
+                <div class="two-column">
+                    <div class="icon-container" style="width: 280px; height: 280px;">
+                        <div class="ai-brain">
+                            <div class="brain-core"></div>
+                            <div class="brain-node node-1"></div>
+                            <div class="brain-node node-2"></div>
+                            <div class="brain-node node-3"></div>
+                            <div class="brain-node node-4"></div>
+                            <div class="brain-node node-5"></div>
+                            <div class="brain-node node-6"></div>
+                        </div>
+                    </div>
+                    <div class="column-content">
+                        <h3>Pourquoi DW + IA ?</h3>
+                        <p>Un Data Warehouse fournit les <span class="keyword" data-title="Données d'Entraînement" data-content="Données historiques utilisées pour entraîner les modèles ML. La qualité et le volume du DW déterminent la précision des prédictions.">données historiques</span> propres et structurées nécessaires pour entraîner des modèles ML performants.</p>
+                        <ul class="info-list">
+                            <li>Données nettoyées et standardisées</li>
+                            <li>Historique long terme pour l'apprentissage</li>
+                            <li>Vue unifiée multi-sources</li>
+                            <li>Infrastructure scalable</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 22: Speaker 5 - Forecasting -->
+        <div class="slide" id="slide-22">
+            <div class="section-indicator section-purple"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">22 / 28</div>
+                <div class="speaker-badge speaker-5">Orateur 5</div>
+                <h2><span class="keyword" data-title="Forecasting" data-content="Prédiction des valeurs futures basée sur l'analyse des tendances historiques. Utilise des séries temporelles et algorithmes comme ARIMA, Prophet.">Prévisions</span> et Forecasting</h2>
+                <p class="subtitle">Anticiper l'avenir grâce aux données historiques</p>
+                <div class="two-column">
+                    <div class="column-content">
+                        <h3>Applications</h3>
+                        <ul class="info-list">
+                            <li><span class="keyword" data-title="Prévision des Ventes" data-content="Estimation du chiffre d'affaires futur par produit, région, période. Améliore la planification des stocks et ressources.">Prévision des ventes</span> par produit/région</li>
+                            <li>Anticipation de la demande</li>
+                            <li>Planification des stocks</li>
+                            <li>Budgétisation précise</li>
+                        </ul>
+                        <h3 style="margin-top: 20px;">Technologies</h3>
+                        <ul class="info-list">
+                            <li><span class="keyword" data-title="ARIMA" data-content="AutoRegressive Integrated Moving Average - Modèle statistique pour l'analyse et la prévision de séries temporelles.">ARIMA</span>, Prophet, LSTM</li>
+                            <li>Analyse de saisonnalité</li>
+                            <li>Détection de tendances</li>
+                        </ul>
+                    </div>
+                    <div class="icon-container" style="width: 260px; height: 200px;">
+                        <div class="chart-icon">
+                            <div class="chart-bar bar-1"></div>
+                            <div class="chart-bar bar-2"></div>
+                            <div class="chart-bar bar-3"></div>
+                            <div class="chart-bar bar-4"></div>
+                            <div class="chart-bar bar-5"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 23: Speaker 5 - Segmentation -->
+        <div class="slide" id="slide-23">
+            <div class="section-indicator section-purple"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">23 / 28</div>
+                <div class="speaker-badge speaker-5">Orateur 5</div>
+                <h2><span class="keyword" data-title="Segmentation Client" data-content="Division des clients en groupes homogènes basée sur leurs caractéristiques et comportements. Permet le marketing ciblé.">Segmentation</span> Clients</h2>
+                <p class="subtitle">Comprendre et cibler vos clients efficacement</p>
+                <div class="content-grid content-grid-3">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #FF3D71, #FF6B6B);">💎</div>
+                        <div class="card-title">Clients Premium</div>
+                        <div class="card-text"><span class="keyword" data-title="RFM Analysis" data-content="Récence, Fréquence, Montant - Méthode de segmentation basée sur le comportement d'achat récent, la fréquence et la valeur.">Haute valeur</span>, fidèles, ambassadeurs de marque. Actions : programmes VIP, offres exclusives.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #0066FF, #00D4FF);">🎯</div>
+                        <div class="card-title">Clients Potentiels</div>
+                        <div class="card-text">Fort potentiel de croissance. Actions : <span class="keyword" data-title="Upselling" data-content="Technique de vente incitant le client à acheter une version supérieure ou des options additionnelles.">upselling</span>, cross-selling ciblé.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #FFD600, #FF8C00);">⚠️</div>
+                        <div class="card-title">Clients à Risque</div>
+                        <div class="card-text">Activité en baisse, signaux de <span class="keyword" data-title="Churn" data-content="Attrition client - Taux de clients qui cessent d'utiliser un produit/service. La prédiction du churn permet d'agir préventivement.">churn</span>. Actions : campagnes de rétention proactives.</div>
+                    </div>
+                </div>
+                <div class="highlight-box">
+                    <p><strong>Algorithmes utilisés :</strong> <span class="keyword" data-title="K-Means" data-content="Algorithme de clustering qui regroupe les données en K groupes basés sur la similarité. Populaire pour la segmentation client.">K-Means</span> clustering, analyse RFM, arbres de décision pour profiler automatiquement les segments.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 24: Speaker 5 - Recommendations & Churn -->
+        <div class="slide" id="slide-24">
+            <div class="section-indicator section-purple"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">24 / 28</div>
+                <div class="speaker-badge speaker-5">Orateur 5</div>
+                <h2>Recommandations & Prédiction Churn</h2>
+                <p class="subtitle">Personnalisation et rétention grâce au ML</p>
+                <div class="content-grid content-grid-2">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #00D68F, #00E5A0);">🎁</div>
+                        <div class="card-title"><span class="keyword" data-title="Système de Recommandation" data-content="Algorithme suggérant des produits/contenus basé sur l'historique et les préférences. Ex: 'Les clients ayant acheté X ont aussi acheté Y'.">Moteur de Recommandation</span></div>
+                        <div class="card-text">
+                            <strong>Techniques :</strong><br>
+                            • <span class="keyword" data-title="Collaborative Filtering" data-content="Recommandation basée sur les comportements similaires d'autres utilisateurs. Ex: Netflix, Amazon.">Filtrage collaboratif</span><br>
+                            • Filtrage basé contenu<br>
+                            • Modèles hybrides<br><br>
+                            <strong>Impact :</strong> +15-30% de ventes croisées
+                        </div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #FF3D71, #FF6B6B);">🚨</div>
+                        <div class="card-title"><span class="keyword" data-title="Churn Prediction" data-content="Modèle ML prédisant la probabilité qu'un client cesse d'utiliser le service. Permet d'agir avant que le client ne parte.">Prédiction d'Attrition</span></div>
+                        <div class="card-text">
+                            <strong>Indicateurs analysés :</strong><br>
+                            • Fréquence de connexion<br>
+                            • Réclamations récentes<br>
+                            • Baisse d'engagement<br><br>
+                            <strong>Impact :</strong> -25% de churn
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 25: Speaker 5 - Results - REMOVED HORMtech -->
+        <div class="slide" id="slide-25">
+            <div class="section-indicator section-purple"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">25 / 28</div>
+                <div class="speaker-badge speaker-5">Orateur 5</div>
+                <!-- Removed HORMtech reference -->
+                <h2>Résultats Concrets</h2>
+                <p class="subtitle">L'impact concret du Data Warehouse + IA</p>
+                <div class="stats-row">
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">+35%</div>
+                        <div class="stat-label">Productivité</div>
+                    </div>
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">-60%</div>
+                        <div class="stat-label">Temps rapports</div>
+                    </div>
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">+20%</div>
+                        <div class="stat-label">Revenus</div>
+                    </div>
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">95%</div>
+                        <div class="stat-label">Fiabilité données</div>
+                    </div>
+                </div>
+                <div class="content-grid content-grid-3">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #0066FF, #00D4FF);">⚡</div>
+                        <div class="card-title">Rapidité</div>
+                        <div class="card-text">Rapports générés en minutes au lieu de jours. Décisions prises en temps réel.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #00D68F, #00E5A0);">🎯</div>
+                        <div class="card-title">Précision</div>
+                        <div class="card-text">Prévisions fiables à 90%. Marketing ciblé avec ROI mesurable.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #9B51E0, #7B3DC9);">💰</div>
+                        <div class="card-title">Profitabilité</div>
+                        <div class="card-text">Optimisation des stocks, réduction des coûts, augmentation des marges.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 26: Summary -->
+        <div class="slide" id="slide-26">
+            <div class="section-indicator section-purple"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">26 / 28</div>
+                <h2>Récapitulatif</h2>
+                <p class="subtitle">Les 5 piliers de notre solution</p>
+                <div class="process-steps">
+                    <div class="process-step">
+                        <div class="step-number" style="background: linear-gradient(135deg, #0066FF, #0044CC);">1</div>
+                        <div class="step-label">Problème<br>identifié</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="process-step">
+                        <div class="step-number" style="background: linear-gradient(135deg, #00D68F, #00B377);">2</div>
+                        <div class="step-label">Solution<br>DW</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="process-step">
+                        <div class="step-number" style="background: linear-gradient(135deg, #FF3D71, #CC2255);">3</div>
+                        <div class="step-label">Pipeline<br>ETL</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="process-step">
+                        <div class="step-number" style="background: linear-gradient(135deg, #FFD600, #CC9900);">4</div>
+                        <div class="step-label">Modèle<br>OLAP</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="process-step">
+                        <div class="step-number" style="background: linear-gradient(135deg, #9B51E0, #7B3DC9);">5</div>
+                        <div class="step-label">IA &<br>Résultats</div>
+                    </div>
+                </div>
+                <div class="content-grid content-grid-2" style="margin-top: 25px;">
+                    <div class="content-card" draggable="true">
+                        <div class="card-title">Ce que nous avons appris</div>
+                        <div class="card-text">
+                            • Les données dispersées créent le chaos<br>
+                            • Un DW centralise et unifie l'information<br>
+                            • ETL assure la qualité des données<br>
+                            • La modélisation dimensionnelle optimise l'analyse<br>
+                            • L'IA transforme les données en actions
+                        </div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-title">Les bénéfices clés</div>
+                        <div class="card-text">
+                            • <span class="keyword" data-title="SSOT" data-content="Single Source of Truth - Une seule version de la vérité pour toute l'organisation.">Source unique de vérité</span><br>
+                            • Décisions basées sur les données<br>
+                            • Réduction des coûts opérationnels<br>
+                            • Avantage compétitif durable<br>
+                            • Innovation continue
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 27: Conclusion -->
+        <div class="slide" id="slide-27">
+            <div class="section-indicator section-purple"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">27 / 28</div>
+                <h2>Conclusion</h2>
+                <p class="subtitle">Le Data Warehouse : Un investissement stratégique</p>
+                <div class="highlight-box" style="max-width: 1000px;">
+                    <p style="font-size: 1.4rem;">« Dans un monde où les données sont le nouveau pétrole, le <span class="keyword" data-title="Data Warehouse" data-content="Infrastructure centralisée transformant les données brutes en intelligence actionnable pour l'entreprise.">Data Warehouse</span> est la raffinerie qui transforme cette ressource brute en carburant pour la croissance. »</p>
+                </div>
+                <div class="content-grid content-grid-3" style="margin-top: 25px;">
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #0066FF, #00D4FF);">🚀</div>
+                        <div class="card-title">Court terme</div>
+                        <div class="card-text">Rapports unifiés, gain de temps immédiat, fin des contradictions.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #00D68F, #00E5A0);">📈</div>
+                        <div class="card-title">Moyen terme</div>
+                        <div class="card-text">Analyses avancées, optimisation des processus, culture data-driven.</div>
+                    </div>
+                    <div class="content-card" draggable="true">
+                        <div class="card-icon" style="background: linear-gradient(135deg, #9B51E0, #7B3DC9);">🏆</div>
+                        <div class="card-title">Long terme</div>
+                        <div class="card-text">IA prédictive, avantage compétitif, innovation continue.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 28: Question -->
+        <div class="slide" id="slide-28">
+            <div class="section-indicator section-purple"></div>
+            <div class="bg-pattern"></div>
+            <div class="floating-shapes">
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="slide-content">
+                <div class="slide-number">28 / 28</div>
+                <div class="title-icon">❓</div>
+                <h1>Question au Public</h1>
+                <div class="highlight-box" style="max-width: 1000px; margin-top: 30px;">
+                    <p style="font-size: 1.5rem; text-align: center;">« Selon vous, quel est le plus grand défi pour une entreprise qui souhaite devenir <span class="keyword" data-title="Data-Driven" data-content="Organisation où chaque décision est guidée par l'analyse des données plutôt que par l'intuition ou l'habitude.">data-driven</span> ? »</p>
+                </div>
+                <div class="stats-row" style="margin-top: 40px;">
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">🔧</div>
+                        <div class="stat-label">Technologie ?</div>
+                    </div>
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">👥</div>
+                        <div class="stat-label">Culture ?</div>
+                    </div>
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">💰</div>
+                        <div class="stat-label">Budget ?</div>
+                    </div>
+                    <div class="stat-item" draggable="true">
+                        <div class="stat-value">📊</div>
+                        <div class="stat-label">Qualité données ?</div>
+                    </div>
+                </div>
+                <p class="subtitle" style="margin-top: 40px; font-size: 1.8rem;"><strong>Merci de votre attention !</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-container">
+        <button class="nav-btn" id="prevBtn" onclick="prevSlide()">←</button>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <span class="slide-counter" id="slideCounter">1 / 28</span>
+        <button class="nav-btn" id="nextBtn" onclick="nextSlide()">→</button>
+    </div>
+
+    <script>
+        const totalSlides = 28;
+        let currentSlide = 1;
+
+        function updateSlide(newSlide) {
+            if (newSlide < 1 || newSlide > totalSlides) return;
+
+            const oldSlideEl = document.getElementById(`slide-${currentSlide}`);
+            const newSlideEl = document.getElementById(`slide-${newSlide}`);
+
+            if (newSlide > currentSlide) {
+                oldSlideEl.classList.remove('active');
+                oldSlideEl.classList.add('prev');
+                newSlideEl.classList.remove('prev');
+                newSlideEl.classList.add('active');
+            } else {
+                oldSlideEl.classList.remove('active');
+                newSlideEl.classList.remove('prev');
+                newSlideEl.classList.add('active');
+                setTimeout(() => {
+                    oldSlideEl.classList.remove('prev');
+                }, 100);
+            }
+
+            currentSlide = newSlide;
+            updateUI();
+        }
+
+        function nextSlide() {
+            updateSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            updateSlide(currentSlide - 1);
+        }
+
+        function updateUI() {
+            document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+            document.getElementById('progressFill').style.width = `${(currentSlide / totalSlides) * 100}%`;
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        // Tooltip functionality
+        const tooltip = document.getElementById('tooltip');
+        const keywords = document.querySelectorAll('.keyword');
+
+        keywords.forEach(keyword => {
+            keyword.addEventListener('mouseenter', (e) => {
+                const title = keyword.getAttribute('data-title');
+                const content = keyword.getAttribute('data-content');
+                
+                tooltip.querySelector('.tooltip-title').textContent = title;
+                tooltip.querySelector('.tooltip-content').textContent = content;
+                
+                const rect = keyword.getBoundingClientRect();
+                let left = rect.left + rect.width / 2;
+                let top = rect.bottom + 10;
+                
+                if (left + 175 > window.innerWidth) {
+                    left = window.innerWidth - 185;
+                }
+                if (left < 175) {
+                    left = 185;
+                }
+                if (top + 150 > window.innerHeight) {
+                    top = rect.top - 10;
+                    tooltip.style.transform = 'translateX(-50%) translateY(-100%)';
+                } else {
+                    tooltip.style.transform = 'translateX(-50%)';
+                }
+                
+                tooltip.style.left = `${left}px`;
+                tooltip.style.top = `${top}px`;
+                tooltip.classList.add('visible');
+            });
+
+            keyword.addEventListener('mouseleave', () => {
+                tooltip.classList.remove('visible');
+            });
+        });
+
+        // Drag and drop functionality
+        let draggedElement = null;
+        let offsetX, offsetY;
+
+        document.querySelectorAll('[draggable="true"], .content-card, .stat-item, .flow-box, .etl-box, .star-dim').forEach(el => {
+            el.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('keyword')) return;
+                
+                draggedElement = el;
+                const rect = el.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                
+                el.style.position = 'fixed';
+                el.style.zIndex = '1000';
+                el.style.left = `${rect.left}px`;
+                el.style.top = `${rect.top}px`;
+                el.style.width = `${rect.width}px`;
+                el.classList.add('dragging');
+            });
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (draggedElement) {
+                draggedElement.style.left = `${e.clientX - offsetX}px`;
+                draggedElement.style.top = `${e.clientY - offsetY}px`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+                draggedElement = null;
+            }
+        });
+
+        // Initialize
+        updateUI();
+    </script>
+</body>
+</html>
